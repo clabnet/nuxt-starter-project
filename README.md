@@ -1,8 +1,8 @@
 ![Tech Stack Banner](./tech-stack-banner.svg)
 
-# Nuxt 3 Starter Application
+# Nuxt 4 Starter Application
 
-A modern, full-stack TypeScript application with Nuxt 3 frontend, Fastify backend, Drizzle ORM, and Zod validation.
+A modern, full-stack TypeScript application with Nuxt 4 frontend, Fastify backend, Drizzle ORM, and Zod validation.
 
 ## Features
 
@@ -51,7 +51,7 @@ API Docs: http://localhost:3001/swagger
 Open a new terminal:
 
 ```powershell
-cd nuxt-app
+cd frontend
 pnpm install
 ```
 
@@ -67,7 +67,7 @@ Frontend will run on: http://localhost:3000
 
 ```
 nuxt-starter-project/
-├── server/                  # Backend (Fastify)
+├── backend/                  # Backend (Fastify)
 │   ├── src/
 │   │   ├── config/         # Configuration files
 │   │   ├── db/             # Database schema and connection
@@ -80,7 +80,7 @@ nuxt-starter-project/
 │   ├── vitest.config.ts    # Vitest configuration
 │   └── package.json
 │
-├── nuxt-app/               # Frontend (Nuxt 4)
+├── frontend/               # Frontend (Nuxt 4)
 │   ├── components/         # Vue components
 │   ├── pages/              # Application pages
 │   ├── composables/        # Composables (useApi)
