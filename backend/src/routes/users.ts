@@ -11,23 +11,40 @@ import {
   deleteUserParamSchema,
 } from '../schemas/users.schema';
 
+import {
+  userSchema,
+  createUserSchema,
+  updateUserSchema,
+  userIdParamSchema,
+  errorSchema,
+  validationErrorSchema,
+  deleteSuccessSchema,
+} from '../schemas/swagger.schema';
+
 type User = InferSelectModel<typeof usersSqlite>;
 
-// Helper function to serialize user data
 const serializeUser = (user: User) => ({
   id: user.id,
   name: user.name,
   surname: user.surname,
   gender: user.gender,
   isTrusted: user.isTrusted,
-  createdAt: user.createdAt, // TypeScript knows this is a string
+  createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
 
-
 const usersRoutes: FastifyPluginAsync = async (fastify) => {
-  // GET /api/users - Get all users
-  fastify.get('/', async (request, reply) => {
+  // GET /api/users
+  fastify.get('/', {
+    schema: {
+      description: 'Get all users',
+      tags: ['users'],
+      response: {
+        200: { type: 'array', items: userSchema },
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const allUsers = await db.select().from(users);
       const serializedUsers = allUsers.map(serializeUser);
@@ -38,8 +55,19 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
-  // GET /api/users/:id - Get user by ID
-  fastify.get('/:id', async (request, reply) => {
+  // GET /api/users/:id
+  fastify.get('/:id', {
+    schema: {
+      description: 'Get a user by ID',
+      tags: ['users'],
+      params: userIdParamSchema,
+      response: {
+        200: userSchema,
+        404: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const { id } = getUserParamSchema.parse(request.params);
       const user = await db.select().from(users).where(eq(users.id, id));
@@ -56,8 +84,19 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
-  // POST /api/users - Create a new user
-  fastify.post('/', async (request, reply) => {
+  // POST /api/users
+  fastify.post('/', {
+    schema: {
+      description: 'Create a new user',
+      tags: ['users'],
+      body: createUserSchema,
+      response: {
+        201: userSchema,
+        400: validationErrorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const validatedData = createUserBodySchema.parse(request.body);
       const newUser = await db.insert(users).values(validatedData).returning();
@@ -75,8 +114,21 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
-  // PUT /api/users/:id - Update a user
-  fastify.put('/:id', async (request, reply) => {
+  // PUT /api/users/:id
+  fastify.put('/:id', {
+    schema: {
+      description: 'Update a user',
+      tags: ['users'],
+      params: userIdParamSchema,
+      body: updateUserSchema,
+      response: {
+        200: userSchema,
+        400: validationErrorSchema,
+        404: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const { id } = getUserParamSchema.parse(request.params);
       const validatedData = updateUserBodySchema.parse(request.body);
@@ -105,8 +157,19 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
     }
   });
 
-  // DELETE /api/users/:id - Delete a user
-  fastify.delete('/:id', async (request, reply) => {
+  // DELETE /api/users/:id
+  fastify.delete('/:id', {
+    schema: {
+      description: 'Delete a user',
+      tags: ['users'],
+      params: userIdParamSchema,
+      response: {
+        200: deleteSuccessSchema,
+        404: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const { id } = deleteUserParamSchema.parse(request.params);
       const deletedUser = await db.delete(users).where(eq(users.id, id)).returning();
@@ -115,7 +178,6 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
         return reply.status(404).send({ error: 'User not found' });
       }
 
-      // Return 200 with success message instead of 204
       return reply.status(200).send({ success: true, message: 'User deleted successfully' });
     } catch (error) {
       console.error('Error deleting user:', error);
