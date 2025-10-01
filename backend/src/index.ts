@@ -70,7 +70,7 @@ const start = async () => {
     console.log('');
     console.log('[SUCCESS] Server is running!');
     console.log('[INFO] Server address: http://localhost:' + PORT);
-    console.log('[INFO] API Documentation: http://localhost:' + PORT + '/api-docs');
+    console.log('[INFO] API Documentation: http://localhost:' + PORT + '/swagger');
     console.log('[INFO] Health check: http://localhost:' + PORT + '/health');
     console.log('[INFO] CORS enabled for: http://localhost:3000');
     console.log('');

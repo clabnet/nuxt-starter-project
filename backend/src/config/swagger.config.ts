@@ -27,7 +27,7 @@ export const swaggerConfig: FastifyDynamicSwaggerOptions = {
 };
 
 export const swaggerUiConfig: FastifySwaggerUiOptions = {
-  routePrefix: '/api-docs',
+  routePrefix: '/swagger',
   uiConfig: {
     docExpansion: 'list',
     deepLinking: true,
