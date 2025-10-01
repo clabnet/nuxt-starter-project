@@ -3,6 +3,12 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import * as dotenv from 'dotenv';
+import {
+  serializerCompiler,
+  validatorCompiler,
+  jsonSchemaTransform,
+  ZodTypeProvider
+} from 'fastify-type-provider-zod';
 import { swaggerConfig, swaggerUiConfig } from './config/swagger.config';
 import usersRoutes from './routes/users';
 
@@ -11,7 +17,7 @@ dotenv.config();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const HOST = process.env.HOST || '0.0.0.0';
 
-// Create Fastify instance
+// Create Fastify instance with Zod type provider
 const fastify = Fastify({
   logger: {
     level: process.env.LOG_LEVEL || 'info',
@@ -23,22 +29,27 @@ const fastify = Fastify({
       },
     },
   },
-});
+}).withTypeProvider<ZodTypeProvider>();
+
+// Set Zod validator and serializer
+fastify.setValidatorCompiler(validatorCompiler);
+fastify.setSerializerCompiler(serializerCompiler);
 
 // Start server
 const start = async () => {
   try {
     // Register CORS - MUST be first
-    // Since v11, default methods are only GET,HEAD,POST
-    // We must explicitly include DELETE, PUT, PATCH
     await fastify.register(cors, {
       origin: ['http://localhost:3000', 'http://localhost:3001'],
       credentials: true,
       methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
     });
 
-    // Register Swagger
-    await fastify.register(swagger, swaggerConfig);
+    // Register Swagger with Zod schema transformation
+    await fastify.register(swagger, {
+      ...swaggerConfig,
+      transform: jsonSchemaTransform,
+    });
     await fastify.register(swaggerUi, swaggerUiConfig);
 
     // Health check route

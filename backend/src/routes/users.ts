@@ -1,4 +1,5 @@
 import { FastifyPluginAsync } from 'fastify';
+import { ZodTypeProvider } from 'fastify-type-provider-zod';
 import { db } from '../db';
 import { users, usersSqlite } from '../db/schema';
 import { eq } from 'drizzle-orm';
@@ -9,17 +10,11 @@ import {
   getUserParamSchema,
   updateUserBodySchema,
   deleteUserParamSchema,
+  userResponseSchema,
+  usersListResponseSchema,
+  errorResponseSchema,
+  deleteSuccessResponseSchema,
 } from '../schemas/users.schema';
-
-import {
-  userSchema,
-  createUserSchema,
-  updateUserSchema,
-  userIdParamSchema,
-  errorSchema,
-  validationErrorSchema,
-  deleteSuccessSchema,
-} from '../schemas/swagger.schema';
 
 type User = InferSelectModel<typeof usersSqlite>;
 
@@ -34,14 +29,16 @@ const serializeUser = (user: User) => ({
 });
 
 const usersRoutes: FastifyPluginAsync = async (fastify) => {
+  const server = fastify.withTypeProvider<ZodTypeProvider>();
+
   // GET /api/users
-  fastify.get('/', {
+  server.get('/', {
     schema: {
       description: 'Get all users',
       tags: ['users'],
       response: {
-        200: { type: 'array', items: userSchema },
-        500: errorSchema,
+        200: usersListResponseSchema,
+        500: errorResponseSchema,
       },
     },
   }, async (request, reply) => {
@@ -56,20 +53,20 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // GET /api/users/:id
-  fastify.get('/:id', {
+  server.get('/:id', {
     schema: {
       description: 'Get a user by ID',
       tags: ['users'],
-      params: userIdParamSchema,
+      params: getUserParamSchema,
       response: {
-        200: userSchema,
-        404: errorSchema,
-        500: errorSchema,
+        200: userResponseSchema,
+        404: errorResponseSchema,
+        500: errorResponseSchema,
       },
     },
   }, async (request, reply) => {
     try {
-      const { id } = getUserParamSchema.parse(request.params);
+      const { id } = request.params;
       const user = await db.select().from(users).where(eq(users.id, id));
 
       if (user.length === 0) {
@@ -85,57 +82,46 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
   });
 
   // POST /api/users
-  fastify.post('/', {
+  server.post('/', {
     schema: {
       description: 'Create a new user',
       tags: ['users'],
-      body: createUserSchema,
+      body: createUserBodySchema,
       response: {
-        201: userSchema,
-        400: validationErrorSchema,
-        500: errorSchema,
+        201: userResponseSchema,
+        500: errorResponseSchema,
       },
     },
   }, async (request, reply) => {
     try {
-      const validatedData = createUserBodySchema.parse(request.body);
-      const newUser = await db.insert(users).values(validatedData).returning();
+      const newUser = await db.insert(users).values(request.body).returning();
       const serialized = serializeUser(newUser[0]);
       return reply.status(201).type('application/json').send(JSON.stringify(serialized));
     } catch (error: any) {
       console.error('Error creating user:', error);
-      if (error.name === 'ZodError') {
-        return reply.status(400).send({
-          error: 'Validation error',
-          details: error.errors,
-        });
-      }
       return reply.status(500).send({ error: 'Failed to create user' });
     }
   });
 
   // PUT /api/users/:id
-  fastify.put('/:id', {
+  server.put('/:id', {
     schema: {
       description: 'Update a user',
       tags: ['users'],
-      params: userIdParamSchema,
-      body: updateUserSchema,
+      params: getUserParamSchema,
+      body: updateUserBodySchema,
       response: {
-        200: userSchema,
-        400: validationErrorSchema,
-        404: errorSchema,
-        500: errorSchema,
+        200: userResponseSchema,
+        404: errorResponseSchema,
+        500: errorResponseSchema,
       },
     },
   }, async (request, reply) => {
     try {
-      const { id } = getUserParamSchema.parse(request.params);
-      const validatedData = updateUserBodySchema.parse(request.body);
-
+      const { id } = request.params;
       const updatedUser = await db
         .update(users)
-        .set({ ...validatedData, updatedAt: new Date().toISOString() })
+        .set({ ...request.body, updatedAt: new Date().toISOString() })
         .where(eq(users.id, id))
         .returning();
 
@@ -147,31 +133,25 @@ const usersRoutes: FastifyPluginAsync = async (fastify) => {
       return reply.type('application/json').send(JSON.stringify(serialized));
     } catch (error: any) {
       console.error('Error updating user:', error);
-      if (error.name === 'ZodError') {
-        return reply.status(400).send({
-          error: 'Validation error',
-          details: error.errors,
-        });
-      }
       return reply.status(500).send({ error: 'Failed to update user' });
     }
   });
 
   // DELETE /api/users/:id
-  fastify.delete('/:id', {
+  server.delete('/:id', {
     schema: {
       description: 'Delete a user',
       tags: ['users'],
-      params: userIdParamSchema,
+      params: getUserParamSchema,
       response: {
-        200: deleteSuccessSchema,
-        404: errorSchema,
-        500: errorSchema,
+        200: deleteSuccessResponseSchema,
+        404: errorResponseSchema,
+        500: errorResponseSchema,
       },
     },
   }, async (request, reply) => {
     try {
-      const { id } = deleteUserParamSchema.parse(request.params);
+      const { id } = request.params;
       const deletedUser = await db.delete(users).where(eq(users.id, id)).returning();
 
       if (deletedUser.length === 0) {

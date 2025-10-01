@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Request/Response schemas for users endpoint
 
-// GET /api/users - Query parameters (optional, not used currently)
+// GET /api/users - Query parameters
 export const getUsersQuerySchema = z
   .object({
     limit: z.string().regex(/^\d+$/).transform(Number).optional(),
@@ -45,8 +45,8 @@ export const userResponseSchema = z.object({
   surname: z.string(),
   gender: z.enum(['male', 'female', 'other']),
   isTrusted: z.boolean(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
 
 export const usersListResponseSchema = z.array(userResponseSchema);
@@ -54,6 +54,11 @@ export const usersListResponseSchema = z.array(userResponseSchema);
 export const errorResponseSchema = z.object({
   error: z.string(),
   details: z.any().optional(),
+});
+
+export const deleteSuccessResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
 });
 
 // Type exports
@@ -65,3 +70,4 @@ export type DeleteUserParam = z.infer<typeof deleteUserParamSchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
 export type UsersListResponse = z.infer<typeof usersListResponseSchema>;
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;
+export type DeleteSuccessResponse = z.infer<typeof deleteSuccessResponseSchema>;
