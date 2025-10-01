@@ -1,0 +1,94 @@
+@import 'tailwindcss';
+
+@layer base {
+  body {
+    background-color: rgb(249 250 251);
+    color: rgb(17 24 39);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    border-radius: 0.5rem;
+    background-color: rgb(2 132 199);
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    color: rgb(255 255 255);
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  .btn-primary:hover {
+    background-color: rgb(3 105 161);
+  }
+
+  .btn-primary:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 2px rgb(255 255 255),
+      0 0 0 4px rgb(14 165 233);
+  }
+
+  .btn-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .btn-secondary {
+    border-radius: 0.5rem;
+    border-width: 1px;
+    border-color: rgb(209 213 219);
+    background-color: rgb(255 255 255);
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    color: rgb(55 65 81);
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  .btn-secondary:hover {
+    background-color: rgb(249 250 251);
+  }
+
+  .btn-secondary:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow:
+      0 0 0 2px rgb(255 255 255),
+      0 0 0 4px rgb(14 165 233);
+  }
+
+  .input-field {
+    width: 100%;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    border-color: rgb(209 213 219);
+    padding: 0.5rem 0.75rem;
+  }
+
+  .input-field:focus {
+    border-color: rgb(14 165 233);
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgb(14 165 233);
+  }
+
+  .label-text {
+    margin-bottom: 0.25rem;
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: rgb(55 65 81);
+  }
+
+  .error-text {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: rgb(220 38 38);
+  }
+}
