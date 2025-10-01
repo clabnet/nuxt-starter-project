@@ -1,3 +1,5 @@
+![Tech Stack Banner](./tech-stack-banner.svg)
+
 # Nuxt 3 Starter Application
 
 A modern, full-stack TypeScript application with Nuxt 3 frontend, Fastify backend, Drizzle ORM, and Zod validation.
